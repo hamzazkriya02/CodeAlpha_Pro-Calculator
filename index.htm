@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Calculator</title>
+
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e3f2fd, #fce4ec);
+  --card: #ffffff;
+  --text: #222;
+}
+
+body.dark {
+  --bg: linear-gradient(135deg, #121212, #1e1e2f);
+  --card: #1f1f2e;
+  --text: #fff;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 20px;
+  font-weight: bold;
+}
+
+.toggle-btn {
+  background: #ab47bc;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+.container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calculator {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.display {
+  height: 70px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 1.6rem;
+  text-align: right;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+
+body.dark .display {
+  background: #000;
+  color: #00ffcc;
+}
+
+.history {
+  height: 60px;
+  font-size: 0.8rem;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  color: gray;
+}
+
+/* GRID */
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+
+button:active {
+  transform: scale(0.92);
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+}
+
+
+button::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+}
+
+button:active::after {
+  transform: scale(2);
+  opacity: 1;
+  transition: 0.4s;
+}
+
+.operator { background: #42a5f5; color: white; }
+.equal { background: #66bb6a; color: white; }
+.clear { background: #ef5350; color: white; }
+.func { background: #ffa726; color: white; }
+.delete { background: #ff7043; color: white; }
+
+
+footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>⚡ Pro Calculator</div>
+  <button class="toggle-btn" onclick="toggleTheme()">🌙</button>
+</header>
+
+<div class="container">
+  <div class="calculator">
+    <div id="history" class="history"></div>
+    <div id="display" class="display">0</div>
+
+    <div class="buttons">
+      <button class="clear">C</button>
+      <button>(</button>
+      <button>)</button>
+      <button class="operator">/</button>
+      <button class="operator">*</button>
+
+      <button class="func">sin</button>
+      <button class="func">cos</button>
+      <button class="func">log</button>
+      <button class="func">√</button>
+      <button class="operator">-</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="operator">+</button>
+      <button class="delete">⌫</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>.</button>
+      <button class="equal">=</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>0</button>
+      <button>%</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built by Hamza • Frontend Developer 🚀
+</footer>
+
+<script>
+const display = document.getElementById("display");
+const history = document.getElementById("history");
+let input = "";
+
+
+const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+
+function updateDisplay() {
+  display.textContent = input || "0";
+}
+
+function calculate(expr) {
+  try {
+    return Function('"use strict";return (' + expr + ')')();
+  } catch {
+    return "Error";
+  }
+}
+
+function flashDisplay() {
+  display.style.boxShadow = "0 0 15px rgba(0,255,200,0.8)";
+  setTimeout(() => display.style.boxShadow = "none", 100);
+}
+
+
+document.querySelectorAll(".buttons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+
+    clickSound.currentTime = 0;
+    clickSound.play();
+    flashDisplay();
+
+    let val = btn.textContent;
+
+    if (val === "C") input = "";
+    else if (val === "⌫") input = input.slice(0, -1);
+    else if (val === "=") {
+      let result = calculate(input);
+      history.innerHTML += `<div>${input} = ${result}</div>`;
+      input = result.toString();
+    }
+    else if (val === "sin") input = Math.sin(eval(input)).toString();
+    else if (val === "cos") input = Math.cos(eval(input)).toString();
+    else if (val === "log") input = Math.log10(eval(input)).toString();
+    else if (val === "√") input = Math.sqrt(eval(input)).toString();
+    else input += val;
+
+    updateDisplay();
+  });
+});
+
+
+function toggleTheme() {
+  document.body.classList.toggle("dark");
+}
+
+
+document.addEventListener("keydown", e => {
+  let key = e.key;
+
+  if (!isNaN(key) || "+-*/().%".includes(key)) input += key;
+  else if (key === "Enter") input = calculate(input).toString();
+  else if (key === "Backspace") input = input.slice(0, -1);
+  else if (key === "Escape") input = "";
+
+  updateDisplay();
+});
+</script>
+
+</body>
+</html>
